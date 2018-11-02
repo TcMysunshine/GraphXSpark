@@ -18,16 +18,30 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import com.chenhao.Graphx.TV;
+import scala.Tuple3;
+import scala.reflect.ClassTag;
+import scala.reflect.ClassTag$;
+
 import static com.sun.tools.doclint.Entity.lambda;
 
 public class sparkTest {
+    private static final ClassTag<Tuple2> tuple2ClassTag = ClassTag$.MODULE$.apply(Tuple2.class);
     public static class TVComparator implements Comparator<TV>, Serializable {
         public int compare(TV tv1, TV tv2){
             return tv1.getPlay()-tv2.getPlay();
         }
     }
     public static void main(String[] args) {
-//        wordCount();
+        SparkConf sparkConf = new SparkConf();
+        sparkConf.setMaster("local");
+        sparkConf.setAppName("wordCount");
+        JavaSparkContext sc = new JavaSparkContext(sparkConf);
+        JavaRDD<String> lines = sc.textFile("tv.txt");
+        JavaPairRDD<String,TV> tv_play_dm = lines.mapToPair(line -> new Tuple2<>
+                (line.split(",")[0],new TV(line.split(",")[0],Integer.valueOf(line.split(",")[1]), Integer.valueOf(line.split(",")[2]))));
+
+    }
+    public static void sum(){
         SparkConf sparkConf = new SparkConf();
         sparkConf.setMaster("local");
         sparkConf.setAppName("wordCount");
@@ -58,7 +72,7 @@ public class sparkTest {
         JavaPairRDD<String, TV> tvTotal = tv.reduceByKey(new Function2<TV, TV, TV>() {
             @Override
             public TV call(TV tv, TV tv2) throws Exception {
-               return new TV(tv.getTv(), tv.getPlay()+tv2.getPlay(), + tv.getDm() + tv2.getDm());
+                return new TV(tv.getTv(), tv.getPlay()+tv2.getPlay(), + tv.getDm() + tv2.getDm());
             }
         });
 //        key value 变为 value key 便于排序
@@ -98,36 +112,7 @@ public class sparkTest {
             }
         });
 
-//        System.out.println(lines.collect());
-//        List<String> wordsList = new ArrayList<>();
-//        wordsList.add("Mary Jack lucy");
-//        wordsList.add("chen wang zhang");
-//        JavaRDD<String> wordsStr = sc.parallelize(wordsList);
-//        System.out.println(wordsStr.collect());
-//        JavaRDD<String> words = wordsStr.flatMap(new FlatMapFunction<String, String>() {
-//            @Override
-//            public Iterable<String> call(String s) throws Exception {
-//                return Arrays.asList(s.split(" "));
-//            }
-//        });
-//        System.out.println(words.collect());
-//        JavaPairRDD<String, Person> wordCount = words.mapToPair(new PairFunction<String, String, Person>() {
-//            @Override
-//            public Tuple2<String, Person> call(String s) throws Exception {
-//                Person p =new Person(s,12);
-//                return new Tuple2<>(s,p);
-//            }
-//        });
-//        wordCount.foreach(new VoidFunction<Tuple2<String, Person>>() {
-//            @Override
-//            public void call(Tuple2<String, Person> stringPersonTuple2) throws Exception {
-//                String user = stringPersonTuple2._1;
-//                Person p = stringPersonTuple2._2;
-//                System.out.println(user + p.getUsername() + Integer.valueOf(p.getAge()));
-//            }
-//        });
     }
-
     public static void wordCount() {
         SparkConf sparkConf = new SparkConf();
         sparkConf.setMaster("local");
