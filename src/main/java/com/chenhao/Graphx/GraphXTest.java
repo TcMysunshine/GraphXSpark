@@ -1,7 +1,6 @@
 package com.chenhao.Graphx;
 
-import akka.dispatch.Foreach;
-import com.sun.corba.se.spi.ior.ObjectKey;
+
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
